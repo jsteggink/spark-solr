@@ -5,7 +5,6 @@ import com.lucidworks.spark.ml.feature.LuceneTextAnalyzerTransformer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.classification.LogisticRegression;
@@ -91,7 +90,7 @@ public class MLPipeline implements SparkApp.RDDProcessor {
     options.put("fields", "id," + labelField + "," + contentFields);
 
     double sampleFraction = Double.parseDouble(cli.getOptionValue("sample", "1.0"));
-    Dataset solrData = sparkSession.read().format("solr").options(options).load();
+    Dataset<Row> solrData = sparkSession.read().format("solr").options(options).load();
     solrData = solrData.sample(false, sampleFraction);
 
     // Configure an ML pipeline, which consists of the following stages:
@@ -131,8 +130,7 @@ public class MLPipeline implements SparkApp.RDDProcessor {
     PipelineStage estimatorStage = null;
 
     if ("NaiveBayes".equals(cli.getOptionValue("classifier", "LogisticRegression"))) {
-      NaiveBayes nb = new NaiveBayes();
-      estimatorStage = nb;
+      estimatorStage = new NaiveBayes();
     } else {
       LogisticRegression lr = new LogisticRegression().setMaxIter(10);
 

@@ -28,7 +28,7 @@ class RDDTestSuite extends TestSuiteBuilder with LazyLogging {
     try {
       val newRDD = new SelectSolrRDD(zkHost, collectionName, sc)
       val partitions = newRDD.partitions
-      assert(partitions.length == 8)
+      assert(partitions.length === 8)
     } finally {
       SolrCloudUtil.deleteCollection(collectionName, cluster)
     }
@@ -77,7 +77,7 @@ class RDDTestSuite extends TestSuiteBuilder with LazyLogging {
       solrQuery.set(SOLR_STREAMING_EXPR, expr)
       val streamExprRDD = new StreamingSolrRDD(zkHost, collectionName, sc, Some(QT_STREAM))
       val results = streamExprRDD.query(solrQuery).collect()
-      assert(results.size == numDocs)
+      assert(results.length === numDocs)
     } finally {
       SolrCloudUtil.deleteCollection(collectionName, cluster)
     }

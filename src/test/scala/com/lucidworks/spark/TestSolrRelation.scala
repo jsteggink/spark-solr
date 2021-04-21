@@ -1,7 +1,7 @@
 package com.lucidworks.spark
 
 import com.lucidworks.spark.util.SolrRelationUtil
-import org.apache.commons.lang3.StringEscapeUtils
+import org.apache.commons.text.StringEscapeUtils
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.spark.sql.sources.{And, EqualTo, Or}
 import org.apache.spark.sql.types._
@@ -10,7 +10,8 @@ class TestSolrRelation extends SparkSolrFunSuite with SparkSolrContextBuilder {
 
   test("Streaming expr schema") {
     val arrayJson = StringEscapeUtils.escapeJson(ArrayType(StringType).json)
-    val longJson = StringEscapeUtils.escapeJson(LongType.json)
+    // TODO: remove?
+    //val longJson = StringEscapeUtils.escapeJson(LongType.json)
     val exprSchema = s"""arrayField:"${arrayJson}",longField:long"""
     val structFields = SolrRelation.parseSchemaExprSchemaToStructFields(exprSchema)
     assert(structFields.size == 2)

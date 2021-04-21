@@ -17,6 +17,7 @@ chart below shows the versions supported across the past releases. 'Connector' r
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Connector      | Spark | Solr
+|https://search.maven.org/artifact/com.lucidworks.spark/spark-solr/4.0.0/jar[4.0.0]   | 3.1.1 | 8.8.2
 |https://search.maven.org/artifact/com.lucidworks.spark/spark-solr/3.8.0/jar[3.8.0]   | 2.4.5 | 8.3.0
 |https://search.maven.org/artifact/com.lucidworks.spark/spark-solr/3.7.0/jar[3.7.0]   | 2.4.4 | 8.3.0
 |https://search.maven.org/artifact/com.lucidworks.spark/spark-solr/3.6.6/jar[3.6.6]   | 2.4.3 | 8.2.0
@@ -478,12 +479,12 @@ Examples:
 
 Using `basicauth`
 [source]
- ./bin/spark-shell --master local[*] --jars ~/Git/spark-solr/target/spark-solr-3.0.1-SNAPSHOT-shaded.jar  --conf 'spark.driver.extraJavaOptions=-Dbasicauth=solr:SolrRocks'
+ ./bin/spark-shell --master local[*] --jars ~/Git/spark-solr/target/spark-solr-4.0.0-SNAPSHOT-shaded.jar  --conf 'spark.driver.extraJavaOptions=-Dbasicauth=solr:SolrRocks'
 
 
 Using `solr.httpclient.config`
 [source]
- ./bin/spark-shell --master local[*] --jars ~/Git/spark-solr/target/spark-solr-3.0.1-SNAPSHOT-shaded.jar  --conf 'spark.driver.extraJavaOptions=-Dsolr.httpclient.config=/Users/kiran/spark/spark-2.1.0-bin-hadoop2.7/auth.txt'
+ ./bin/spark-shell --master local[*] --jars ~/Git/spark-solr/target/spark-solr-4.0.0-SNAPSHOT-shaded.jar  --conf 'spark.driver.extraJavaOptions=-Dsolr.httpclient.config=/Users/kiran/spark/spark-3.1.1-bin-hadoop3.2/auth.txt'
 
 
 Contents of config file

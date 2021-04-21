@@ -23,7 +23,7 @@ Now, let’s populate Solr with tweets using Spark streaming:
 $SPARK_HOME/bin/spark-submit --master $SPARK_MASTER \
  --conf "spark.executor.extraJavaOptions=-Dtwitter4j.oauth.consumerKey=? -Dtwitter4j.oauth.consumerSecret=? -Dtwitter4j.oauth.accessToken=? -Dtwitter4j.oauth.accessTokenSecret=?" \
  --class com.lucidworks.spark.SparkApp \
- ./target/spark-solr-1.0-SNAPSHOT-shaded.jar \
+ ./target/spark-solr-4.0.0-SNAPSHOT-shaded.jar \
  twitter-to-solr -zkHost localhost:9983 -collection socialdata
 
 Replace `$SPARK_MASTER` with the URL of your Spark master server. If you don’t have access to a Spark cluster, you can run the Spark job in local mode by passing:

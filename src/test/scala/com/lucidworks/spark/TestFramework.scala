@@ -2,7 +2,6 @@ package com.lucidworks.spark
 
 import java.io.File
 import java.util.UUID
-
 import com.lucidworks.spark.example.ml.DateConverter
 import com.lucidworks.spark.util.{EventsimUtil, SolrCloudUtil, SolrSupport}
 import org.apache.commons.io.FileUtils
@@ -14,9 +13,10 @@ import org.apache.spark.sql.functions.udf
 import org.eclipse.jetty.servlet.ServletHolder
 import org.junit.Assert._
 import org.restlet.ext.servlet.ServerServlet
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
+import org.scalatest.{BeforeAndAfterAll, TestSuite, TestSuiteMixin}
 
-trait SolrCloudTestBuilder extends BeforeAndAfterAll with LazyLogging { this: Suite =>
+
+trait SolrCloudTestBuilder extends TestSuiteMixin with BeforeAndAfterAll with LazyLogging { this: TestSuite =>
 
   @transient var cluster: MiniSolrCloudCluster = _
   @transient var cloudClient: CloudSolrClient = _
@@ -64,10 +64,9 @@ trait SolrCloudTestBuilder extends BeforeAndAfterAll with LazyLogging { this: Su
 
     super.afterAll()
   }
-
 }
 
-trait SparkSolrContextBuilder extends BeforeAndAfterAll { this: Suite =>
+trait SparkSolrContextBuilder extends TestSuiteMixin with BeforeAndAfterAll { this: TestSuite =>
 
   @transient var sparkSession: SparkSession = _
   @transient var sc: SparkContext = _
@@ -122,9 +121,9 @@ trait EventsimBuilder extends TestSuiteBuilder {
   def numShards: Int = 2
 }
 
-trait MovielensBuilder extends TestSuiteBuilder with BeforeAndAfterAll with BeforeAndAfterEach {
+trait MovielensBuilder extends TestSuiteBuilder {
 
-  val uuid = UUID.randomUUID().toString.replace("-", "_")
+  val uuid: String = UUID.randomUUID().toString.replace("-", "_")
   val moviesColName: String = s"movielens_movies_$uuid"
   val ratingsColName: String = s"movielens_ratings_$uuid"
   val userColName: String = s"movielens_users_$uuid"

@@ -343,8 +343,8 @@ public class LuceneTextAnalyzerTransformerTest {
     LuceneTextAnalyzerTransformer analyzer = new LuceneTextAnalyzerTransformer()
         .setInputCol("rawText")
         .setOutputCol("tokens");
-    assertExpectedTokens(analyzer, Arrays.asList(new TokenizerTestData(null, new String[]{})));
-    assertExpectedTokens(analyzer, Arrays.asList(new TokenizerTestData("", new String[]{})));
+    assertExpectedTokens(analyzer, Collections.singletonList(new TokenizerTestData(null, new String[]{})));
+    assertExpectedTokens(analyzer, Collections.singletonList(new TokenizerTestData("", new String[]{})));
     assertExpectedTokens(analyzer, Collections.singletonList(
         new MV_TokenizerTestData(new String[] {null, "Harold's not around.", null, "The dog's nose KNOWS!", ""},
             new String[]{"harold's", "not", "around", "the", "dog's", "nose", "knows"})));

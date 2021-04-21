@@ -37,11 +37,12 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>11</java.version>
-    <spark.version>3.0.0</spark.version>
-    <solr.version>8.4.1</solr.version>
-    <hadoop.version>2.7.5</hadoop.version>
-    <fasterxml.version>2.11.0</fasterxml.version>
-    <scala.version>2.12.10</scala.version>
+    <spark.version>3.1.1</spark.version>
+    <solr.version>8.8.2</solr.version>
+    <hadoop.version>3.3.0</hadoop.version>
+    <fasterxml.version>2.12.3</fasterxml.version>
+    <restlet-version>2.4.3</restlet-version>
+    <scala.version>2.12.13</scala.version>
     <scala.binary.version>2.12</scala.binary.version>
     <scoverage.plugin.version>1.4.1</scoverage.plugin.version>
     <MaxPermSize>128m</MaxPermSize>
@@ -60,14 +61,6 @@
       <id>Central Maven repository</id>
       <name>Central Maven repository https</name>
       <url>https://repo.maven.apache.org/maven2</url>
-    </repository>
-    <repository>
-      <id>Restlet Releases</id>
-      <name>Restlet Releases Repository</name>
-      <url>http://maven.restlet.com/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
     </repository>
   </repositories>
   <profiles>
@@ -121,7 +114,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.5</version>
+            <version>0.8.6</version>
             <configuration>
               <excludes>
               <exclude>com/lucidworks/spark/example/**</exclude>
@@ -160,13 +153,27 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>restlet</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>maven-restlet</id>
+          <name>Public online Restlet repository</name>
+          <url>https://maven.restlet.talend.com</url>
+        </repository>
+      </repositories>
+    </profile>
   </profiles>
+
   <build>
     <plugins>
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>4.4.0</version>
+        <version>4.4.1</version>
         <executions>
           <execution>
             <id>eclipse-add-source</id>
@@ -199,7 +206,8 @@
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
           <recompileMode>incremental</recompileMode>
-          <useZincServer>true</useZincServer>
+          <!-- TODO doesn't work anymore -->
+          <!--<useZincServer>true</useZincServer>-->
           <javacArgs>
             <javacArg>-source</javacArg>
             <javacArg>${java.version}</javacArg>
@@ -219,7 +227,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.7</version>
+        <version>2.8.1</version>
       </plugin>
       <!-- Surefire runs Java tests -->
       <plugin>
@@ -231,7 +239,7 @@
       <plugin>
         <groupId>org.scalatest</groupId>
         <artifactId>scalatest-maven-plugin</artifactId>
-        <version>1.0</version>
+        <version>2.0.2</version>
         <configuration>
           <stderr/>
           <!-- Log to stderr -->
@@ -375,7 +383,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.4</version>
+        <version>3.0.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -388,7 +396,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.6</version>
+        <version>1.6.8</version>
         <extensions>true</extensions>
         <configuration>
           <serverId>ossrh</serverId>
@@ -462,7 +470,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.7</version>
+      <version>2.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.solr</groupId>
@@ -581,19 +589,39 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.restlet.jse</groupId>
+      <artifactId>org.restlet</artifactId>
+      <version>${restlet-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.restlet.jse</groupId>
+      <artifactId>org.restlet.ext.jackson</artifactId>
+      <version>${restlet-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.restlet.jee</groupId>
+      <artifactId>org.restlet.ext.servlet</artifactId>
+      <version>${restlet-version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.9</version>
+      <version>3.12.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
+      <version>${fasterxml.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
       <version>${fasterxml.version}</version>
     </dependency>
     <dependency>
@@ -628,7 +656,13 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.binary.version}</artifactId>
-      <version>3.0.8</version>
+      <version>3.2.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest-funsuite_${scala.binary.version}</artifactId>
+      <version>3.2.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -652,7 +686,7 @@
     <dependency>
         <groupId>com.github.tomakehurst</groupId>
         <artifactId>wiremock-standalone</artifactId>
-        <version>2.26.3</version>
+        <version>2.27.2</version>
       <exclusions>
         <exclusion>
           <groupId>org.mortbay.jetty</groupId>

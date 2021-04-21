@@ -2,7 +2,6 @@ package com.lucidworks.spark;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
@@ -25,8 +24,9 @@ import org.junit.AfterClass;
 import org.noggit.CharArr;
 import org.noggit.JSONWriter;
 import org.restlet.ext.servlet.ServerServlet;
-import org.scalatest.FunSuite;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -53,17 +53,9 @@ public class TestSolrCloudClusterSupport {
   public static String readSolrXml(File solrXml) throws IOException {
     StringBuilder sb = new StringBuilder();
     String line;
-    BufferedReader br = null;
-    try {
-      br = new BufferedReader(new InputStreamReader(new FileInputStream(solrXml), StandardCharsets.UTF_8));
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(solrXml), StandardCharsets.UTF_8))) {
       while ((line = br.readLine()) != null) {
         sb.append(line);
-      }
-    } finally {
-      if (br != null) {
-        try {
-          br.close();
-        } catch (IOException ignore){}
       }
     }
     return sb.toString();
@@ -94,29 +86,35 @@ public class TestSolrCloudClusterSupport {
     cluster = new MiniSolrCloudCluster(1, null /* hostContext */,
             testWorkingDir.toPath(), solrXmlContents, extraServlets, null);
 
-    cloudSolrServer = new CloudSolrClient.Builder().withZkHost(cluster.getZkServer().getZkAddress()).sendUpdatesOnlyToShardLeaders().build();
+    cloudSolrServer = new CloudSolrClient.Builder(
+            Collections.singletonList(cluster.getZkServer().getZkAddress()), Optional.empty())
+            .sendUpdatesOnlyToShardLeaders().build();
     cloudSolrServer.connect();
 
-    assertTrue(!cloudSolrServer.getZkStateReader().getClusterState().getLiveNodes().isEmpty());
+    assertFalse(cloudSolrServer.getZkStateReader().getClusterState().getLiveNodes().isEmpty());
   }
 
   @AfterClass
-  public static void stopCluster() throws Exception {
-    if (cloudSolrServer != null) {
-      cloudSolrServer.close();
-    } else {
-      log.error("No CloudSolrClient available for this test! " +
-              "Typically this means there was a failure to start the MiniSolrCloudCluster, check logs for more details.");
-    }
-    if (cluster != null) {
-      cluster.shutdown();
-    } else {
-      log.error("No MiniSolrCloudCluster available for this test! " +
-              "Typically this means there was a failure to start the MiniSolrCloudCluster, check logs for more details.");
-    }
+  public static void stopCluster() {
+    try {
+      if (cloudSolrServer != null) {
+        cloudSolrServer.close();
+      } else {
+        log.error("No CloudSolrClient available for this test! " +
+                "Typically this means there was a failure to start the MiniSolrCloudCluster, check logs for more details.");
+      }
+      if (cluster != null) {
+        cluster.shutdown();
+      } else {
+        log.error("No MiniSolrCloudCluster available for this test! " +
+                "Typically this means there was a failure to start the MiniSolrCloudCluster, check logs for more details.");
+      }
 
-    if (testWorkingDir != null && testWorkingDir.isDirectory()) {
-      FileUtils.deleteDirectory(testWorkingDir);
+      if (testWorkingDir != null && testWorkingDir.isDirectory()) {
+        FileUtils.deleteDirectory(testWorkingDir);
+      }
+    } catch (Exception e) {
+      log.error("Error stopping cluster.", e);
     }
   }
 
@@ -173,7 +171,7 @@ public class TestSolrCloudClusterSupport {
 
     ClusterState cs = zkr.getClusterState();
     Collection<Slice> slices = cs.getCollection(testCollectionName).getActiveSlices();
-    assertTrue(slices.size() == shards);
+    assertEquals(slices.size(), shards);
     boolean allReplicasUp = false;
     long waitMs = 0L;
     long maxWaitMs = maxWaitSecs * 1000L;
@@ -192,7 +190,7 @@ public class TestSolrCloudClusterSupport {
         String shardId = shard.getName();
         assertNotNull("No Slice for " + shardId, shard);
         Collection<Replica> replicas = shard.getReplicas();
-        assertTrue(replicas.size() == rf);
+        assertEquals(replicas.size(), rf);
         leader = shard.getLeader();
         assertNotNull(leader);
         log.info("Found "+replicas.size()+" replicas and leader on "+

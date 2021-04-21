@@ -85,15 +85,14 @@ class StreamingSolrRDD(
 
         val url = getReplicaToQuery(partition, context.attemptNumber())
         val query = partition.query
-        logger.debug(s"Using the shard url ${url} for getting partition data for split: ${split.index}")
+        logger.debug(s"Using the shard url $url for getting partition data for split: ${split.index}")
         val solrRequestHandler = requestHandler.getOrElse(DEFAULT_REQUEST_HANDLER)
         query.setRequestHandler(solrRequestHandler)
         logger.debug(s"Using export handler to fetch documents from ${partition.preferredReplica} for query: ${partition.query}")
         val resultsIterator = getExportHandlerBasedIterator(url, query, partition.numWorkers, partition.workerId)
-        // TODO: Spark3
-        //context.addTaskCompletionListener { (context) =>
-        //  logger.info(f"Fetched ${resultsIterator.getNumDocs} rows from shard $url for partition ${split.index}")
-        //}
+        context.addTaskCompletionListener[Unit] { _ =>
+          logger.info(f"Fetched ${resultsIterator.getNumDocs} rows from shard $url for partition ${split.index}")
+        }
         resultsIterator
       case partition: AnyRef => throw new Exception("Unknown partition type '" + partition.getClass)
     }
@@ -162,7 +161,7 @@ class StreamingSolrRDD(
 
   override def buildQuery: SolrQuery = {
     var solrQuery : SolrQuery = SolrQuerySupport.toQuery(query.get)
-    if (!solrQuery.getFields.eq(null) && solrQuery.getFields.length > 0) {
+    if (!solrQuery.getFields.eq(null) && solrQuery.getFields.nonEmpty) {
       solrQuery = solrQuery.setFields(fields.getOrElse(Array.empty[String]):_*)
     }
     if (!solrQuery.getRows.eq(null)) {

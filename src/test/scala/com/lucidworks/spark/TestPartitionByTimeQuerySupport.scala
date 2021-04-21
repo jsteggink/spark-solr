@@ -21,7 +21,7 @@ class TestPartitionByTimeQuerySupport extends TestSuiteBuilder {
     SolrCloudUtil.buildCollection(zkHost, collection3Name, null, 1, cloudClient, sc)
     try {
       val jsonFileLocation = "src/test/resources/test-data/events.json"
-      val jsonDF = sparkSession.read.option("inferTimestamp", false).json(jsonFileLocation)
+      val jsonDF = sparkSession.read.option("inferTimestamp", value = false).json(jsonFileLocation)
       assert(jsonDF.count == 100)
 
       var col1DF=jsonDF.filter(jsonDF("timestamp_tdt") >="2014-11-24T17:30" && jsonDF("timestamp_tdt") < "2014-11-24T17:31")

@@ -19,6 +19,7 @@ package com.lucidworks.spark.example.ml
 
 import com.lucidworks.spark.SparkApp
 import com.lucidworks.spark.ml.feature.LuceneTextAnalyzerTransformer
+import org.apache.commons.cli
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.Option.{builder => OptionBuilder}
 import org.apache.spark.SparkConf
@@ -47,20 +48,20 @@ import org.apache.spark.sql.SparkSession
   *
   * {{{
   *  $SPARK_HOME/bin/spark-submit --master 'local[2]' --class com.lucidworks.spark.SparkApp \
-  *  target/spark-solr-2.0.0-SNAPSHOT-shaded.jar ml-pipeline-scala
+  *  target/spark-solr-4.0.0-SNAPSHOT-shaded.jar ml-pipeline-scala
   * }}}
   *
   * To see a description of all available options, run the following:
   *
   * {{{
   *  $SPARK_HOME/bin/spark-submit --class com.lucidworks.spark.SparkApp \
-  *  target/spark-solr-2.0.0-SNAPSHOT-shaded.jar ml-pipeline-scala --help
+  *  target/spark-solr-4.0.0-SNAPSHOT-shaded.jar ml-pipeline-scala --help
   * }}}
   */
 class MLPipelineScala extends SparkApp.RDDProcessor {
   import MLPipelineScala._
   def getName = "ml-pipeline-scala"
-  def getOptions = Array(
+  def getOptions: Array[cli.Option] = Array(
     OptionBuilder().longOpt("query").hasArg.argName("QUERY").required(false).desc(
       s"Query to identify documents in the training set. Default: $DefaultQuery").build(),
     OptionBuilder().longOpt("labelField").hasArg.argName("FIELD").required(false).desc(
@@ -142,7 +143,7 @@ class MLPipelineScala extends SparkApp.RDDProcessor {
     println(s"Cross-Fold Test Error = ${1.0 - accuracyCrossFold}")
 
     // TODO: remove - debug
-    for (r <- predictions.select("id", labelField, PredictedLabelCol).sample(false, 0.1).collect) {
+    for (r <- predictions.select("id", labelField, PredictedLabelCol).sample(withReplacement = false, 0.1).collect) {
       println(s"${r(0)}: actual=${r(1)}, predicted=${r(2)}")
     }
 
@@ -155,11 +156,14 @@ class MLPipelineScala extends SparkApp.RDDProcessor {
     println(s"""Confusion Matrix
                           |${metrics.confusionMatrix}\n""".stripMargin)
 
-    // compute the false positive rate per label
-    // TODO: Spark3
-    //println(s"""\nF-Measure: ${metrics.fMeasure}
-    //                      |label\tfpr\n""".stripMargin)
     val labels = labelConverter.getLabels
+
+    // compute the F-Measure per label
+    for (i <- labels.indices)
+      println(s"""\nF-Measure: ${metrics.fMeasure(i.toDouble)}
+                            |label\t${labels(i)}\n""".stripMargin)
+
+    // compute the false positive rate per label
     for (i <- labels.indices)
       println(s"${labels(i)}\t${metrics.falsePositiveRate(i.toDouble)}")
 
@@ -178,10 +182,10 @@ object MLPipelineScala {
   val DefaultContentFields = "content_txt_en,Subject_txt_en"
   val DefaultCollection = "ml20news"
   val DefaultSample = "1.0"
-  val WhitespaceTokSchema =
+  val WhitespaceTokSchema: String =
     """{ "analyzers": [{ "name": "ws_tok", "tokenizer": { "type": "whitespace" } }],
       |  "fields": [{ "regex": ".+", "analyzer": "ws_tok" }] }""".stripMargin
-  val StdTokLowerSchema =
+  val StdTokLowerSchema: String =
     """{ "analyzers": [{ "name": "std_tok_lower", "tokenizer": { "type": "standard" },
       |                  "filters": [{ "type": "lowercase" }] }],
       |  "fields": [{ "regex": ".+", "analyzer": "std_tok_lower" }] }""".stripMargin

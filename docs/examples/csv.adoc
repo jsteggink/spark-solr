@@ -4,7 +4,7 @@
 
 Once the shaded artifact is downloaded or built, it can be imported to the spark-shell by using the `--jars` config
 
-    ./bin/spark-shell --jars spark-solr-3.0.0-alpha-shaded.jar
+    ./bin/spark-shell --jars spark-solr-4.0.0-SNAPSHOT-shaded.jar
 
 === Writing data
 

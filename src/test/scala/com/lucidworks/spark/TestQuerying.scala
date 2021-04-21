@@ -11,7 +11,7 @@ class TestQuerying extends TestSuiteBuilder {
 
   test("Solr version") {
     val solrVersion = SolrSupport.getSolrVersion(zkHost)
-    assert(solrVersion == "8.4.1")
+    assert(solrVersion == "8.8.2")
     assert(SolrSupport.isSolrVersionAtleast(solrVersion, 7, 5, 0))
     assert(SolrSupport.isSolrVersionAtleast(solrVersion, 7, 3, 0))
     assert(SolrSupport.isSolrVersionAtleast(solrVersion, 7, 1, 0))
@@ -113,10 +113,10 @@ class TestQuerying extends TestSuiteBuilder {
 
   def buildTestData() : DataFrame = {
     val testDataSchema : StructType = StructType(
-      StructField("id", IntegerType, true) ::
-        StructField("one_txt", StringType, false) ::
-        StructField("two_txt", StringType, false) ::
-        StructField("three_s", StringType, false) :: Nil)
+      StructField("id", IntegerType, nullable = true) ::
+        StructField("one_txt", StringType, nullable = false) ::
+        StructField("two_txt", StringType, nullable = false) ::
+        StructField("three_s", StringType, nullable = false) :: Nil)
 
     val rows = Seq(
       Row(1, "A", "B", "C"),
